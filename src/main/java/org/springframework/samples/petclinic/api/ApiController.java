@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +18,11 @@ public class ApiController {
 	@Autowired
 	JdbcTemplate jdbcTemplate;
 
+	/**
+	 * Retrieves a list of all owners.
+	 *
+	 * @return a list of Owner objects.
+	 */
 	@RequestMapping(value = "/owners", produces = "application/json")
 	public List<Owner> getOwners() {
 		List<Owner> ownerList = jdbcTemplate.query("select id, first_name, last_name from owners", (rs, rowNum) -> {
@@ -31,6 +35,12 @@ public class ApiController {
 		return ownerList;
 	}
 
+	/**
+	 * Retrieves a list of pets by their name.
+	 *
+	 * @param name the name of the pet.
+	 * @return a list of maps containing pet details.
+	 */
 	@RequestMapping(value = "/pets/{name}", produces = "application/json")
 	public List<Map<String, Object>> getPetsByName(@PathVariable("name") String name) {
 		List<Map<String, Object>> pets = jdbcTemplate
@@ -38,4 +48,22 @@ public class ApiController {
 		return pets;
 	}
 
+	/**
+	 * Retrieves a list of pets for a specific owner.
+	 *
+	 * @param ownerId the ID of the owner.
+	 * @return a list of Pet objects.
+	 */
+	@RequestMapping(value = "/owners/{ownerId}/pets", produces = "application/json")
+	public List<Pet> getPetsByOwner(@PathVariable("ownerId") int ownerId) {
+		List<Pet> pets = jdbcTemplate.query("select id, name, birth_date from pets where owner_id = ?",
+				new Object[] { ownerId }, (rs, rowNum) -> {
+					Pet p = new Pet();
+					p.setId(rs.getInt("id"));
+					p.setName(rs.getString("name"));
+					p.setBirthDate(rs.getDate("birth_date").toLocalDate());
+					return p;
+				});
+		return pets;
+	}
 }
