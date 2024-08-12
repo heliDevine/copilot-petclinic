@@ -61,7 +61,6 @@ public class ApiController {
 		}
 	}
 
-
 	/**
 	 * Retrieves a list of pets for a specific owner.
 	 *
@@ -85,6 +84,17 @@ public class ApiController {
 			return pets;
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving pets by owner", e);
+		}
+	}
+
+	@RequestMapping(value = "/drugs", produces = "application/json")
+	public List<Map<String, Object>> getDrugs() {
+		try {
+			List<Map<String, Object>> drugs = jdbcTemplate
+				.queryForList("SELECT id, name, description, price FROM drugs ORDER BY price");
+			return drugs;
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error retrieving drugs", e);
 		}
 	}
 }
